@@ -5,15 +5,15 @@ const TOPE_DOLARES = 200;
 let historialOperaciones = [];
 
 const calcularDolares = () => {
-    let pesos = prompt("¿Cuántos pesos tienes?");
+    let pesos = prompt("¿Cuántos pesos tenéss?");
     pesos = parseFloat(pesos);
 
     if (isNaN(pesos) || pesos <= 0) {
-        alert("Por favor, ingresa un monto válido en pesos.");
+        alert("Por favor, ingresá un monto válido en pesos.");
         return;
     }
 
-    let dolaresDeseados = prompt("¿Cuántos dólares quieres comprar?");
+    let dolaresDeseados = prompt("¿Cuántos dólares querés comprar?");
     dolaresDeseados = parseFloat(dolaresDeseados);
 
     if (isNaN(dolaresDeseados) || dolaresDeseados <= 0) {
@@ -22,27 +22,27 @@ const calcularDolares = () => {
     }
 
     if (dolaresDeseados > TOPE_DOLARES) {
-        alert(`Solo puedes comprar hasta ${TOPE_DOLARES} dólares.`);
+        alert(`Solo podés comprar hasta ${TOPE_DOLARES} dólares.`);
         dolaresDeseados = TOPE_DOLARES;
     }
 
     let costoPesos = dolaresDeseados * DOLAR_OFICIAL;
     if (costoPesos > pesos) {
         dolaresDeseados = pesos / DOLAR_OFICIAL; // Calcular cuántos dólares puede comprar
-        alert(`No tienes suficientes pesos para comprar ${dolaresDeseados.toFixed(2)} dólares.\nCon ${pesos.toFixed(2)} pesos, puedes comprar hasta ${dolaresDeseados.toFixed(2)} dólares.`);
+        alert(`No tenéss suficientes pesos para comprar ${dolaresDeseados.toFixed(2)} dólares.\nCon ${pesos.toFixed(2)} pesos, podés comprar hasta ${dolaresDeseados.toFixed(2)} dólares.`);
         costoPesos = dolaresDeseados * DOLAR_OFICIAL; // Actualizar costo
     }
 
-    let dolaresAVender = prompt(`Tienes ${dolaresDeseados.toFixed(2)} dólares comprados.\n¿Cuántos dólares quieres vender en el mercado paralelo?`);
+    let dolaresAVender = prompt(`Tienes ${dolaresDeseados.toFixed(2)} dólares comprados.\n¿Cuántos dólares querés vender en el mercado paralelo?`);
     dolaresAVender = parseFloat(dolaresAVender);
 
     if (isNaN(dolaresAVender) || dolaresAVender < 0) {
-        alert("Por favor, ingresa un monto válido para vender.");
+        alert("Por favor, ingresá un monto válido para vender.");
         return;
     }
 
     if (dolaresAVender > dolaresDeseados) {
-        alert(`No puedes vender más de ${dolaresDeseados.toFixed(2)} dólares que compraste.`);
+        alert(`No podés vender más de ${dolaresDeseados.toFixed(2)} dólares que compraste.`);
         dolaresAVender = dolaresDeseados;
     }
 
