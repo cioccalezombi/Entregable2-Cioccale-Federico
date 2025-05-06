@@ -2,87 +2,106 @@ const DOLAR_OFICIAL = 1096.75;
 const DOLAR_BLUE = 1345;
 const TOPE_DOLARES = 200;
 
-let historialOperaciones = [];
+let historialOperaciones = JSON.parse(localStorage.getItem('historialOperaciones')) || [];
 
-const calcularDolares = () => {
-    let pesos = prompt("¿Cuántos pesos tenéss?");
-    pesos = parseFloat(pesos);
+const form = document.getElementById('dolarForm');
+const resultadoDiv = document.getElementById('resultado');
+const historialDiv = document.getElementById('historial');
+const limpiarHistorialBtn = document.getElementById('limpiarHistorial');
 
-    if (isNaN(pesos) || pesos <= 0) {
-        alert("Por favor, ingresá un monto válido en pesos.");
-        return;
-    }
-
-    let dolaresDeseados = prompt("¿Cuántos dólares querés comprar?");
-    dolaresDeseados = parseFloat(dolaresDeseados);
-
-    if (isNaN(dolaresDeseados) || dolaresDeseados <= 0) {
-        alert("Por favor, ingresa un monto válido de dólares.");
-        return;
-    }
-
-    if (dolaresDeseados > TOPE_DOLARES) {
-        alert(`Solo podés comprar hasta ${TOPE_DOLARES} dólares.`);
-        dolaresDeseados = TOPE_DOLARES;
-    }
-
-    let costoPesos = dolaresDeseados * DOLAR_OFICIAL;
-    if (costoPesos > pesos) {
-        dolaresDeseados = pesos / DOLAR_OFICIAL; // Calcular cuántos dólares puede comprar
-        alert(`No tenéss suficientes pesos para comprar ${dolaresDeseados.toFixed(2)} dólares.\nCon ${pesos.toFixed(2)} pesos, podés comprar hasta ${dolaresDeseados.toFixed(2)} dólares.`);
-        costoPesos = dolaresDeseados * DOLAR_OFICIAL; // Actualizar costo
-    }
-
-    let dolaresAVender = prompt(`Tienes ${dolaresDeseados.toFixed(2)} dólares comprados.\n¿Cuántos dólares querés vender en el mercado paralelo?`);
-    dolaresAVender = parseFloat(dolaresAVender);
-
-    if (isNaN(dolaresAVender) || dolaresAVender < 0) {
-        alert("Por favor, ingresá un monto válido para vender.");
-        return;
-    }
-
-    if (dolaresAVender > dolaresDeseados) {
-        alert(`No podés vender más de ${dolaresDeseados.toFixed(2)} dólares que compraste.`);
-        dolaresAVender = dolaresDeseados;
-    }
-
-    let pesosObtenidos = dolaresAVender * DOLAR_BLUE;
-
-    let diferencia = pesosObtenidos - (dolaresAVender * DOLAR_OFICIAL);
-
-    alert(`Compraste ${dolaresDeseados.toFixed(2)} dólares por ${costoPesos.toFixed(2)} pesos.\nVendiste ${dolaresAVender.toFixed(2)} dólares en el mercado paralelo por ${pesosObtenidos.toFixed(2)} pesos.\nLa diferencia que hiciste es: ${diferencia.toFixed(2)} pesos.`);
-
-    let operacion = {
-        pesosIngresados: pesos,
-        dolaresComprados: dolaresDeseados,
-        dolaresVendidos: dolaresAVender,
-        pesosObtenidos: pesosObtenidos,
-        diferencia: diferencia
-    };
-    historialOperaciones.push(operacion);
-
-    console.log("Operación realizada:");
-    console.log(operacion);
-
-    console.log("Historial de operaciones:");
-    for (let i = 0; i < historialOperaciones.length; i++) {
-        console.log(`Operación ${i + 1}: ${historialOperaciones[i].pesosIngresados.toFixed(2)} pesos -> Compró ${historialOperaciones[i].dolaresComprados.toFixed(2)} USD -> Vendió ${historialOperaciones[i].dolaresVendidos.toFixed(2)} USD por ${historialOperaciones[i].pesosObtenidos.toFixed(2)} pesos -> Diferencia: ${historialOperaciones[i].diferencia.toFixed(2)} pesos`);
-    }
-
-    let repetir = confirm("¿Quieres hacer otro cálculo?");
-    let contador = 0;
-    while (repetir && contador < 3) { // Límite de 3 repeticiones
-        calcularDolares();
-        contador++;
-        if (contador < 3) {
-            repetir = confirm("¿Quieres hacer otro cálculo?");
-        } else {
-            alert("Límite de cálculos alcanzado.");
-        }
-    }
+const mostrarMensaje = (mensaje, esError = false) => {
+    resultadoDiv.innerHTML = `<p class="${esError ? 'error' : ''}">${mensaje}</p>`;
 };
 
-// Ejecutar la función con un retraso de 3 segundos
-setTimeout(() => {
-    calcularDolares();
-}, 2000);
+const actualizarHistorial = () => {
+    historialDiv.innerHTML = '';
+    historialOperaciones.forEach((op, index) => {
+        const operacionDiv = document.createElement('div');
+        operacionDiv.innerHTML = `
+            Operación ${index + 1}: ${op.pesosIngresados.toFixed(2)} pesos → 
+            Compró ${op.dolaresComprados.toFixed(2)} USD → 
+            Vendió ${op.dolaresVendidos.toFixed(2)} USD por ${op.pesosObtenidos.toFixed(2)} pesos → 
+            Diferencia: ${op.diferencia.toFixed(2)} pesos
+        `;
+        historialDiv.appendChild(operacionDiv);
+    });
+    localStorage.setItem('historialOperaciones', JSON.stringify(historialOperaciones));
+};
+
+const calcularDolares = (e) => {
+    e.preventDefault();
+
+    const pesos = parseFloat(document.getElementById('pesos').value);
+    const dolaresDeseados = parseFloat(document.getElementById('dolaresDeseados').value);
+    const dolaresAVender = parseFloat(document.getElementById('dolaresAVender').value);
+
+    if (isNaN(pesos) || pesos <= 0) {
+        mostrarMensaje('Por favor, ingresa un monto válido en pesos.', true);
+        return;
+    }
+
+    if (isNaN(dolaresDeseados) || dolaresDeseados <= 0) {
+        mostrarMensaje('Por favor, ingresa un monto válido de dólares.', true);
+        return;
+    }
+
+    let dolaresComprados = dolaresDeseados;
+    if (dolaresDeseados > TOPE_DOLARES) {
+        mostrarMensaje(`Solo puedes comprar hasta ${TOPE_DOLARES} dólares.`, true);
+        dolaresComprados = TOPE_DOLARES;
+    }
+
+    let costoPesos = dolaresComprados * DOLAR_OFICIAL;
+    if (costoPesos > pesos) {
+        dolaresComprados = pesos / DOLAR_OFICIAL;
+        costoPesos = dolaresComprados * DOLAR_OFICIAL;
+        mostrarMensaje(`No tienes suficientes pesos. Con ${pesos.toFixed(2)} pesos, puedes comprar hasta ${dolaresComprados.toFixed(2)} dólares.`, true);
+    }
+
+    if (isNaN(dolaresAVender) || dolaresAVender < 0) {
+        mostrarMensaje('Por favor, ingresa un monto válido para vender.', true);
+        return;
+    }
+
+    let dolaresVendidos = dolaresAVender;
+    if (dolaresAVender > dolaresComprados) {
+        mostrarMensaje(`No puedes vender más de ${dolaresComprados.toFixed(2)} dólares.`, true);
+        dolaresVendidos = dolaresComprados;
+    }
+
+    const pesosObtenidos = dolaresVendidos * DOLAR_BLUE;
+    const diferencia = pesosObtenidos - (dolaresVendidos * DOLAR_OFICIAL);
+
+    const mensaje = `
+        Compraste ${dolaresComprados.toFixed(2)} dólares por ${costoPesos.toFixed(2)} pesos.<br>
+        Vendiste ${dolaresVendidos.toFixed(2)} dólares en el mercado paralelo por ${pesosObtenidos.toFixed(2)} pesos.<br>
+        La diferencia que hiciste es: ${diferencia.toFixed(2)} pesos.
+    `;
+    mostrarMensaje(mensaje);
+
+    const operacion = {
+        pesosIngresados: pesos,
+        dolaresComprados,
+        dolaresVendidos,
+        pesosObtenidos,
+        diferencia
+    };
+    historialOperaciones.push(operacion);
+    actualizarHistorial();
+
+    form.reset();
+};
+
+const limpiarHistorial = () => {
+    historialOperaciones = [];
+    localStorage.removeItem('historialOperaciones');
+    actualizarHistorial();
+    mostrarMensaje('Historial limpiado.');
+};
+
+// evensos
+form.addEventListener('submit', calcularDolares);
+limpiarHistorialBtn.addEventListener('click', limpiarHistorial);
+
+// carga historial
+actualizarHistorial();
